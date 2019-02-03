@@ -6,7 +6,6 @@ import (
 	"io"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 //Board to play with
@@ -233,61 +232,6 @@ func (b *Board) MakeAssumptions(ix int, jx int, t int) []Assumption {
 	return ass
 }
 
-func (b *Board) MakeAssumptionsGoRoutine(ix int, jx int, t int) []Assumption {
-	var ass []Assumption
-
-	b.Cells[ix][jx] = t
-
-	ass = append(ass, Assumption{ix, jx, t})
-	queue := make(chan Assumption, 1)
-
-	wg := new(sync.WaitGroup)
-	wgq := new(sync.WaitGroup)
-
-	for i := 0; i < 9; i++ {
-		for j := 0; j < 9; j++ {
-			if !(ix == i && jx == j) {
-				//fmt.Printf(" (%d,%d) =>", i, j)
-				wg.Add(1)
-				go func(ik int, jk int) {
-					defer wg.Done()
-					con := b.GetConstrain(ik, jk)
-					if len(con) == 1 {
-
-						//fmt.Printf(" (%d,%d,%d) ", ik, jk, con[0])
-						b.Cells[ik][jk] = con[0]
-						wgq.Add(1)
-
-						queue <- Assumption{ik, jk, con[0]}
-						//ass = append(ass, )
-
-						//return ass
-
-					}
-
-				}(i, j)
-			}
-		}
-	}
-
-	go func() {
-		for a := range queue {
-			ass = append(ass, a)
-			//fmt.Printf("%v \n", a)
-
-			wgq.Done()
-		}
-	}()
-
-	wg.Wait()
-
-	close(queue)
-
-	wgq.Wait()
-
-	//fmt.Printf("ass %v", ass)
-	return ass
-}
 func (b *Board) UndoAssumptions(ass []Assumption) {
 
 	b.Traceback++
