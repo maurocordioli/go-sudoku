@@ -10,21 +10,18 @@ import (
 
 //Board to play with
 type Board struct {
-	Cells      [9][9]int
-	Contraints [9][9]CellConstain
-	Traceback  int
+	Cells     [9][9]int
+	Traceback int
 }
 
-type CellConstain struct {
-	Allowed [10]bool
-}
-
+//Assumption used to track assumption  un possible sulutions
 type Assumption struct {
 	I int
 	J int
 	V int
 }
 
+//Print in a pretty format the currend board
 func (b *Board) Print() {
 
 	for i := 0; i < 9; i++ {
@@ -64,7 +61,7 @@ func (b *Board) Read(r io.Reader) error {
 	}
 }
 
-//FindNextAmptyCell fine the next empty cell on the board
+//FindNextEmptyCell fine the next empty cell on the board
 func (b *Board) FindNextEmptyCell() (r int, c int) {
 
 	for i := 0; i < 9; i++ {
@@ -79,11 +76,12 @@ func (b *Board) FindNextEmptyCell() (r int, c int) {
 	return -1, -1
 }
 
-//FindNextAmptyCell fine the next empty cell on the board
+//IsValid check if a board is a valid configuration
 func (b *Board) IsValid() (bool, bool) {
 
 	zeros := false
 
+	//scan rows
 	for i := 0; i < 9; i++ {
 		seen := make([]bool, 10)
 
@@ -102,6 +100,7 @@ func (b *Board) IsValid() (bool, bool) {
 		}
 	}
 
+	//scan cols
 	for j := 0; j < 9; j++ {
 		seen := make([]bool, 10)
 
@@ -120,6 +119,7 @@ func (b *Board) IsValid() (bool, bool) {
 		}
 	}
 
+	//scan 3x3 sections
 	for s := 0; s < 9; s++ {
 		i0 := (s / 3) * 3
 		j0 := (s % 3) * 3
@@ -147,6 +147,7 @@ func (b *Board) IsValid() (bool, bool) {
 	return true, zeros
 }
 
+//GetConstrain get the constarined values for a cell
 func (b *Board) GetConstrain(ix int, jx int) []int {
 
 	var res []int
@@ -207,6 +208,7 @@ func (b *Board) GetConstrain(ix int, jx int) []int {
 	return res
 }
 
+//MakeAssumptions make the assumptions on the possible solution
 func (b *Board) MakeAssumptions(ix int, jx int, t int) []Assumption {
 	var ass []Assumption
 
@@ -232,6 +234,7 @@ func (b *Board) MakeAssumptions(ix int, jx int, t int) []Assumption {
 	return ass
 }
 
+//UndoAssumptions revert [wrong] assumptions
 func (b *Board) UndoAssumptions(ass []Assumption) {
 
 	b.Traceback++
@@ -246,6 +249,7 @@ func (b *Board) UndoAssumptions(ass []Assumption) {
 	}
 }
 
+//Solve the board
 func (b *Board) Solve(d int) bool {
 
 	//fmt.Printf("depth %d \n", d)
