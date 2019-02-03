@@ -9,7 +9,7 @@ run using
 >go test
 
 and expect something as
-
+```
 8 0 0 | 0 0 0 | 0 0 0
 0 0 3 | 6 0 0 | 0 0 0
 0 7 0 | 0 9 0 | 2 0 0
